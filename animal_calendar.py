@@ -192,6 +192,15 @@ class AnimalCalendar(ctk.CTk):
             if selected_animal in self.animal_colors:
                 del self.animal_colors[selected_animal]
 
+        # ---- deletes events connected to that animal ---- #
+            for date_str in list(self.events_db.keys()):
+                updated_tasks = [task for task in self.events_db[date_str] if task["animal"] != selected_animal]
+
+                if updated_tasks:
+                    self.events_db[date_str] = updated_tasks
+                else:
+                    del self.events_db[date_str]
+
         remaining_animals = sorted(list(self.animal_colors.keys()))
 
         if remaining_animals:
@@ -206,6 +215,7 @@ class AnimalCalendar(ctk.CTk):
 
             self.save_data()
             self.update_agenda_view()
+            self.highlight_event_dates()
 
     def add_custom_category(self):
         new_cat = self.custom_entry.get().strip()
