@@ -1,9 +1,16 @@
+import customtkinter as ctk
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
 from models import CalendarModel
 from views import CalendarView
+
 
 class CalendarController:
     def __init__(self):
         self.model = CalendarModel()
+
 
         animal_list = list(self.model.animal_colors.key()) if self.model.animal_colors else ["No Animals Saved"]
         initial_color = "#1f6aa5"
@@ -20,6 +27,7 @@ class CalendarController:
         self.view.on_schedule_task_callback = self.handle_schedule_task
         self.view.on_gestation_callback = self.handle_gestation_calculation
         self.view.on_delete_task_callback = self.handle_delete_task
+        self.view.on_theme_toggle_callback = self.handle_theme_toggle
 
         self.view.cal.bind("<<CalendarSelected>>", lambda e: self.refresh_agenda())
         self.view.cal.bind("<<CalendarMonthChanged>>", lambda e: self.view.render_calendar_highlights(self.model.events_db.keys()))
@@ -105,6 +113,29 @@ class CalendarController:
         date_str = self.view.cal.get_date()
         day_tasks = self.model.events_db.get(date_str, [])
         self.view.render_agenda_view(date_str, day_tasks, self.model.animal_colors)
+
+    def handle_theme_toggle(self, switch_state):
+        """Swaps the global theme dynamically and adjusts the base calendar colors."""
+        if switch_state == 1:
+            ctk.set_appearance_mode("Dark")
+            self.view.theme_switch.configure(text="🌙 Dark Mode")
+            self.view.cal.configure(
+                background="#2b2b2b", foreground="white",
+                headersbackground="#202020", headersforeground="white",
+                normalbackground="#1e1e1e", normalforeground="white",
+                weekendbackground="#1e1e1e", weekendforeground="#ff7675"
+            )
+        else:
+            ctk.set_appearance_mode("Light")
+            self.view.theme_switch.configure(text="☀️ Light Mode")
+            self.view.cal.configure(
+                background="#ffffff", foreground="#3c4043",
+                headersbackground="#f0f0f0", headersforeground="#3c4043",
+                normalbackground="#ffffff", normalforeground="#3c4043",
+                weekendbackground="#ffffff", weekendforeground="#70757a"
+            )
+
+        self.view.render_calendar_highlights(self.model.events_db.keys())
 
 
 if __name__ == "__main__":
